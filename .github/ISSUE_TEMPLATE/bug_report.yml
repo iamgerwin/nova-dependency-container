@@ -1,0 +1,70 @@
+name: Bug Report
+description: Report an issue with Nova Dependency Container
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Install the package
+        2. Add dependency container to resource
+        3. Set dependency on field
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: dropdown
+    id: nova-version
+    attributes:
+      label: Nova version
+      options:
+        - Nova 5.x
+        - Nova 4.x
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: laravel-version
+    attributes:
+      label: Laravel version
+      options:
+        - Laravel 12.x
+        - Laravel 11.x
+        - Laravel 10.x
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: php-version
+    attributes:
+      label: PHP version
+      options:
+        - PHP 8.3
+        - PHP 8.2
+        - PHP 8.1
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.
