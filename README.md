@@ -16,6 +16,7 @@ A Laravel Nova field container allowing fields to depend on other field values. 
 - **Laravel 12 Ready**: Full support for Laravel 11.x and 12.x
 - **PHP 8.3 Support**: Modern PHP features and type safety
 - **Fully Tested**: Comprehensive test coverage with Pest
+- **Development Ready**: Comprehensive testing and code quality tools
 
 ## Requirements
 
