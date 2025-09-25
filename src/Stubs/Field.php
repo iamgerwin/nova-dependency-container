@@ -65,11 +65,7 @@ abstract class Field
         return function () {};
     }
 
-    public function resolve($resource, ?string $attribute = null): void
-    {
-    }
+    public function resolve($resource, ?string $attribute = null): void {}
 
-    public function resolveForDisplay($resource, ?string $attribute = null): void
-    {
-    }
+    public function resolveForDisplay($resource, ?string $attribute = null): void {}
 }

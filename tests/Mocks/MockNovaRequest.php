@@ -6,6 +6,4 @@ namespace Iamgerwin\NovaDependencyContainer\Tests\Mocks;
 
 use Illuminate\Http\Request;
 
-class MockNovaRequest extends Request
-{
-}
+class MockNovaRequest extends Request {}

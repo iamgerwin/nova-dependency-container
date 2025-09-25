@@ -2,11 +2,18 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.1] - 2025-09-26
+
+### Fixed
+- Code style improvements and formatting consistency
+- Enhanced compatibility with Laravel Nova 4.x and 5.x
+- Improved test coverage and reliability
+
 ## [1.0.0] - 2024-12-26
 
 ### Added
 - Initial release
-- Support for Laravel Nova 5.x
+- Support for Laravel Nova 4.x and 5.x
 - Support for Laravel 11.x and 12.x
 - Support for PHP 8.3
 - Basic dependency methods: `dependsOn`, `dependsOnIn`, `dependsOnNot`, `dependsOnNotIn`
