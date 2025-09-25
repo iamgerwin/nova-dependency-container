@@ -2,6 +2,16 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.3] - 2025-09-26
+
+### Added
+- Psalm configuration for future static analysis support (awaiting PHP 8.4 compatibility)
+- Psalm cache to gitignore
+
+### Changed
+- Updated package description to clarify Laravel Nova 4 and 5 compatibility
+- Prepared for enhanced development tooling
+
 ## [1.0.2] - 2025-09-26
 
 ### Fixed
