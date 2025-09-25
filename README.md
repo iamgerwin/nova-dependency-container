@@ -7,12 +7,14 @@
 
 A Laravel Nova field container allowing fields to depend on other field values. Show and hide fields dynamically based on other fields' values with support for complex conditional logic.
 
+![Nova Dependency Container Demo](https://i.imgur.com/P8ujZsG.gif)
+
 ## Features
 
 - **Conditional Field Display**: Show/hide fields based on other field values
 - **Multiple Dependency Types**: Support for various comparison operators
 - **Complex Logic**: Chain multiple conditions together
-- **Nova 4 & 5 Compatible**: Works with Laravel Nova 4.x and 5.x
+- **Nova 4 & 5 Compatible**: Works with Laravel Nova 4.x and 5.x (tested with Nova 5.7.5)
 - **Laravel 12 Ready**: Full support for Laravel 11.x and 12.x
 - **PHP 8.3 Support**: Modern PHP features and type safety
 - **Fully Tested**: Comprehensive test coverage with Pest
