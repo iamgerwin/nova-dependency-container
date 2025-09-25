@@ -1,0 +1,17 @@
+.nova-dependency-container {
+  &.hidden {
+    display: none !important;
+  }
+
+  &.visible {
+    display: block;
+  }
+
+  .field-wrapper {
+    margin-bottom: 1rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

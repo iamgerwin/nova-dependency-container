@@ -1,0 +1,34 @@
+{
+  "name": "nova-dependency-container",
+  "version": "1.0.0",
+  "description": "A Laravel Nova field container allowing to depend on other fields values",
+  "main": "dist/js/field.js",
+  "scripts": {
+    "dev": "npm run development",
+    "development": "mix",
+    "watch": "mix watch",
+    "watch-poll": "mix watch -- --watch-options-poll=1000",
+    "hot": "mix watch --hot",
+    "prod": "npm run production",
+    "production": "mix --production"
+  },
+  "devDependencies": {
+    "@inertiajs/inertia": "^0.11.0",
+    "@vue/compiler-sfc": "^3.4.0",
+    "laravel-mix": "^6.0.49",
+    "postcss": "^8.4.35",
+    "resolve-url-loader": "^5.0.0",
+    "sass": "^1.70.0",
+    "sass-loader": "^14.1.0",
+    "vue": "^3.4.0",
+    "vue-loader": "^17.4.2"
+  },
+  "keywords": [
+    "laravel",
+    "nova",
+    "field",
+    "dependency"
+  ],
+  "author": "iamgerwin",
+  "license": "MIT"
+}
