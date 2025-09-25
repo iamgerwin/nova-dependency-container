@@ -1,0 +1,69 @@
+{
+    "name": "iamgerwin/nova-dependency-container",
+    "description": "A Laravel Nova field container allowing to depend on other fields values",
+    "keywords": [
+        "laravel",
+        "nova",
+        "dependency",
+        "container",
+        "field",
+        "conditional"
+    ],
+    "homepage": "https://github.com/iamgerwin/nova-dependency-container",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "iamgerwin",
+            "email": "iamgerwin@live.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "laravel/framework": "^11.0|^12.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.14",
+        "nunomaduro/collision": "^8.0",
+        "larastan/larastan": "^3.0",
+        "orchestra/testbench": "^9.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-arch": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "phpstan/extension-installer": "^1.3",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Iamgerwin\\NovaDependencyContainer\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Iamgerwin\\NovaDependencyContainer\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Iamgerwin\\NovaDependencyContainer\\FieldServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
