@@ -7,7 +7,7 @@
 
 A Laravel Nova field container allowing fields to depend on other field values. Show and hide fields dynamically based on other fields' values with support for complex conditional logic.
 
-![Nova Dependency Container Demo](https://i.imgur.com/P8ujZsG.gif)
+![Nova Dependency Container Demo](https://i.imgur.com/TpG8L0Z.gif)
 
 ## Features
 
