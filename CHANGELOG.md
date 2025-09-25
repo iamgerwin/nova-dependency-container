@@ -2,6 +2,15 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.2] - 2025-09-26
+
+### Fixed
+- Fixed Laravel 12 compatibility in GitHub Actions by updating Orchestra Testbench version requirement
+- Added support for Orchestra Testbench v10 for Laravel 12 testing
+
+### Changed
+- Updated Orchestra Testbench dependency to support both v9 and v10
+
 ## [1.0.1] - 2025-09-26
 
 ### Fixed
