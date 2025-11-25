@@ -45,10 +45,85 @@ export default {
   },
 
   mounted() {
+    this.detectFlexibleContextOnMount();
     this.checkDependencies();
   },
 
   methods: {
+    /**
+     * Attempt to detect Flexible field context at mount time.
+     */
+    detectFlexibleContextOnMount() {
+      // Method 1: Check container's own attribute
+      const ownAttribute = this.field?.attribute || '';
+      if (ownAttribute) {
+        const prefix = this.extractPrefixFromAttribute(ownAttribute);
+        if (prefix) {
+          this.cachedContextPrefix = prefix;
+          return;
+        }
+      }
+
+      // Method 2: Check child field attributes
+      const childFields = this.field?.fields || [];
+      for (const child of childFields) {
+        if (child.attribute) {
+          const childPrefix = this.extractPrefixFromAttribute(child.attribute);
+          if (childPrefix) {
+            this.cachedContextPrefix = childPrefix;
+            return;
+          }
+        }
+      }
+
+      // Method 3: Walk up the Vue component tree to find Flexible layout
+      let parent = this.$parent;
+      let depth = 0;
+      const maxDepth = 20;
+
+      while (parent && depth < maxDepth) {
+        // Check for Flexible layout indicators
+        if (parent.layout !== undefined || parent.layoutIndex !== undefined || parent.groupIndex !== undefined) {
+          const flexKey = parent.field?.attribute || parent.attribute || '';
+          const index = parent.layoutIndex ?? parent.groupIndex ?? parent.index ?? 0;
+
+          if (flexKey) {
+            this.cachedContextPrefix = `${flexKey}__${index}__`;
+            return;
+          }
+        }
+
+        // Check parent's field for Flexible prefix pattern
+        if (parent.field?.attribute) {
+          const prefix = this.extractPrefixFromAttribute(parent.field.attribute);
+          if (prefix) {
+            this.cachedContextPrefix = prefix;
+            return;
+          }
+        }
+
+        parent = parent.$parent;
+        depth++;
+      }
+
+      // Method 4: Check all fields to find our context
+      this.$nextTick(() => {
+        if (!this.cachedContextPrefix) {
+          const allFields = this.getAllFields();
+          for (const f of allFields) {
+            if (f.attribute) {
+              const prefix = this.extractPrefixFromAttribute(f.attribute);
+              if (prefix) {
+                this.cachedContextPrefix = prefix;
+                this.checkDependencies(); // Re-check with detected context
+                return;
+              }
+            }
+          }
+        }
+      });
+    },
+
     checkDependencies() {
       if (!this.field.dependencies || this.field.dependencies.length === 0) {
         this.isVisible = true;
@@ -122,17 +197,16 @@ export default {
       }
 
       // For Flexible fields: resolve attribute relative to current context
-      const contextPrefix = this.getFlexibleContextPrefix();
-      if (contextPrefix) {
+      if (this.cachedContextPrefix) {
         // Try to find field with same prefix (within same Flexible group)
-        const prefixedAttribute = `${contextPrefix}${attribute}`;
+        const prefixedAttribute = `${this.cachedContextPrefix}${attribute}`;
         const prefixedMatch = allFields.find(f => f.attribute === prefixedAttribute);
         if (prefixedMatch) {
           return prefixedMatch;
         }
 
         // Also try alternative Flexible attribute formats
-        const alternativeFormats = this.getFlexibleAttributeFormats(contextPrefix, attribute);
+        const alternativeFormats = this.getFlexibleAttributeFormats(this.cachedContextPrefix, attribute);
         for (const format of alternativeFormats) {
           const match = allFields.find(f => f.attribute === format);
           if (match) {
@@ -194,48 +268,6 @@ export default {
       const bracketMatch = attribute.match(/^(.+\[\d+\]\[)/);
       if (bracketMatch) {
         return bracketMatch[1];
-      }
-
-      return null;
-    },
-
-    /**
-     * Detect the Flexible field context prefix from the container's own field attribute.
-     * Flexible fields use prefixes like: flexible_key__index__ or flexible_key[index]
-     */
-    getFlexibleContextPrefix() {
-      // Return cached prefix if available
-      if (this.cachedContextPrefix) {
-        return this.cachedContextPrefix;
-      }
-
-      // Check if this container has a prefixed attribute (indicating it's inside a Flexible field)
-      const ownAttribute = this.field?.attribute || '';
-
-      // Pattern 1: Double underscore format (e.g., "overlay_items__0__field_name")
-      const underscoreMatch = ownAttribute.match(/^(.+__\d+__)/);
-      if (underscoreMatch) {
-        this.cachedContextPrefix = underscoreMatch[1];
-        return this.cachedContextPrefix;
-      }
-
-      // Pattern 2: Bracket format (e.g., "overlay_items[0][field_name]")
-      const bracketMatch = ownAttribute.match(/^(.+\[\d+\]\[)/);
-      if (bracketMatch) {
-        this.cachedContextPrefix = bracketMatch[1];
-        return this.cachedContextPrefix;
-      }
-
-      // Try to detect from child field attributes (inside the container)
-      const childFields = this.field?.fields || [];
-      for (const child of childFields) {
-        if (child.attribute) {
-          const childPrefix = this.extractPrefixFromAttribute(child.attribute);
-          if (childPrefix) {
-            this.cachedContextPrefix = childPrefix;
-            return this.cachedContextPrefix;
-          }
-        }
       }
 
       return null;
