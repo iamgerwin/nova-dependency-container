@@ -112,11 +112,135 @@ export default {
     },
 
     findFieldByAttribute(attribute) {
-      const parent = this.$parent;
-      if (parent && parent.fields) {
-        return parent.fields.find(f => f.attribute === attribute);
+      const allFields = this.getAllFields();
+
+      // First try exact match
+      const exactMatch = allFields.find(f => f.attribute === attribute);
+      if (exactMatch) {
+        return exactMatch;
       }
+
+      // For Flexible fields: resolve attribute relative to current context
+      const contextPrefix = this.getFlexibleContextPrefix();
+      if (contextPrefix) {
+        // Try to find field with same prefix (within same Flexible group)
+        const prefixedAttribute = `${contextPrefix}${attribute}`;
+        const prefixedMatch = allFields.find(f => f.attribute === prefixedAttribute);
+        if (prefixedMatch) {
+          return prefixedMatch;
+        }
+
+        // Also try alternative Flexible attribute formats
+        const alternativeFormats = this.getFlexibleAttributeFormats(contextPrefix, attribute);
+        for (const format of alternativeFormats) {
+          const match = allFields.find(f => f.attribute === format);
+          if (match) {
+            return match;
+          }
+        }
+      }
+
+      // Fallback: find any field that ends with the attribute name (for nested contexts)
+      const suffixMatch = allFields.find(f => {
+        if (!f.attribute) return false;
+        const attr = f.attribute;
+        // Match patterns like: prefix__attribute, prefix[index][attribute]
+        return attr.endsWith(`__${attribute}`) ||
+               attr.endsWith(`][${attribute}]`) ||
+               attr.endsWith(`[${attribute}]`);
+      });
+
+      return suffixMatch || null;
+    },
+
+    /**
+     * Get all fields from the parent context.
+     * Handles both standard Nova detail views and nested Flexible field contexts.
+     */
+    getAllFields() {
+      // Walk up the component tree to find fields
+      let parent = this.$parent;
+      let maxDepth = 10;
+
+      while (parent && maxDepth-- > 0) {
+        // Check for fields array directly on parent
+        if (parent.fields && Array.isArray(parent.fields)) {
+          return parent.fields;
+        }
+        // Check for fields in parent's refs
+        if (parent.$refs?.fields && Array.isArray(parent.$refs.fields)) {
+          return parent.$refs.fields.map(f => f.field || f);
+        }
+        parent = parent.$parent;
+      }
+
+      return [];
+    },
+
+    /**
+     * Detect the Flexible field context prefix from the container's own field attribute.
+     * Flexible fields use prefixes like: flexible_key__index__ or flexible_key[index]
+     */
+    getFlexibleContextPrefix() {
+      // Check if this container has a prefixed attribute (indicating it's inside a Flexible field)
+      const ownAttribute = this.field?.attribute || '';
+
+      // Pattern 1: Double underscore format (e.g., "overlay_items__0__field_name")
+      const underscoreMatch = ownAttribute.match(/^(.+__\d+__)/);
+      if (underscoreMatch) {
+        return underscoreMatch[1];
+      }
+
+      // Pattern 2: Bracket format (e.g., "overlay_items[0][field_name]")
+      const bracketMatch = ownAttribute.match(/^(.+\[\d+\]\[)/);
+      if (bracketMatch) {
+        return bracketMatch[1];
+      }
+
+      // Try to detect from parent/sibling field attributes
+      const siblingFields = this.field?.fields || [];
+      for (const sibling of siblingFields) {
+        if (sibling.attribute) {
+          const siblingUnderscoreMatch = sibling.attribute.match(/^(.+__\d+__)/);
+          if (siblingUnderscoreMatch) {
+            return siblingUnderscoreMatch[1];
+          }
+          const siblingBracketMatch = sibling.attribute.match(/^(.+\[\d+\]\[)/);
+          if (siblingBracketMatch) {
+            return siblingBracketMatch[1];
+          }
+        }
+      }
+
       return null;
+    },
+
+    /**
+     * Generate alternative attribute formats for Flexible fields.
+     */
+    getFlexibleAttributeFormats(prefix, attribute) {
+      const formats = [];
+
+      // Extract the base key and index from the prefix
+      const underscoreMatch = prefix.match(/^(.+)__(\d+)__$/);
+      const bracketMatch = prefix.match(/^(.+)\[(\d+)\]\[$/);
+
+      if (underscoreMatch) {
+        const [, key, index] = underscoreMatch;
+        // Generate bracket format alternative
+        formats.push(`${key}[${index}][${attribute}]`);
+        // Single underscore variant
+        formats.push(`${key}_${index}_${attribute}`);
+      }
+
+      if (bracketMatch) {
+        const [, key, index] = bracketMatch;
+        // Generate underscore format alternative
+        formats.push(`${key}__${index}__${attribute}`);
+        formats.push(`${key}_${index}_${attribute}`);
+      }
+
+      return formats;
     },
 
     isEmpty(value) {
