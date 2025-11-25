@@ -19,6 +19,7 @@ export default {
     return {
       dependentFieldValues: {},
       isVisible: false,
+      cachedContextPrefix: null,
     };
   },
 
@@ -178,36 +179,61 @@ export default {
     },
 
     /**
+     * Extract the prefix (e.g., "overlay_items__0__") from a full attribute.
+     */
+    extractPrefixFromAttribute(attribute) {
+      if (!attribute) return null;
+
+      // Pattern 1: Double underscore format (e.g., "overlay_items__0__field_name")
+      const underscoreMatch = attribute.match(/^(.+__\d+__)/);
+      if (underscoreMatch) {
+        return underscoreMatch[1];
+      }
+
+      // Pattern 2: Bracket format (e.g., "overlay_items[0][field_name]")
+      const bracketMatch = attribute.match(/^(.+\[\d+\]\[)/);
+      if (bracketMatch) {
+        return bracketMatch[1];
+      }
+
+      return null;
+    },
+
+    /**
      * Detect the Flexible field context prefix from the container's own field attribute.
      * Flexible fields use prefixes like: flexible_key__index__ or flexible_key[index]
      */
     getFlexibleContextPrefix() {
+      // Return cached prefix if available
+      if (this.cachedContextPrefix) {
+        return this.cachedContextPrefix;
+      }
+
       // Check if this container has a prefixed attribute (indicating it's inside a Flexible field)
       const ownAttribute = this.field?.attribute || '';
 
       // Pattern 1: Double underscore format (e.g., "overlay_items__0__field_name")
       const underscoreMatch = ownAttribute.match(/^(.+__\d+__)/);
       if (underscoreMatch) {
-        return underscoreMatch[1];
+        this.cachedContextPrefix = underscoreMatch[1];
+        return this.cachedContextPrefix;
       }
 
       // Pattern 2: Bracket format (e.g., "overlay_items[0][field_name]")
       const bracketMatch = ownAttribute.match(/^(.+\[\d+\]\[)/);
       if (bracketMatch) {
-        return bracketMatch[1];
+        this.cachedContextPrefix = bracketMatch[1];
+        return this.cachedContextPrefix;
       }
 
-      // Try to detect from parent/sibling field attributes
-      const siblingFields = this.field?.fields || [];
-      for (const sibling of siblingFields) {
-        if (sibling.attribute) {
-          const siblingUnderscoreMatch = sibling.attribute.match(/^(.+__\d+__)/);
-          if (siblingUnderscoreMatch) {
-            return siblingUnderscoreMatch[1];
-          }
-          const siblingBracketMatch = sibling.attribute.match(/^(.+\[\d+\]\[)/);
-          if (siblingBracketMatch) {
-            return siblingBracketMatch[1];
+      // Try to detect from child field attributes (inside the container)
+      const childFields = this.field?.fields || [];
+      for (const child of childFields) {
+        if (child.attribute) {
+          const childPrefix = this.extractPrefixFromAttribute(child.attribute);
+          if (childPrefix) {
+            this.cachedContextPrefix = childPrefix;
+            return this.cachedContextPrefix;
           }
         }
       }
