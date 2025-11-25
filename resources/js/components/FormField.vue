@@ -3,7 +3,7 @@
     <component
       v-for="(field, index) in field.fields"
       :key="field.attribute || index"
-      :ref="'field-' + field.attribute"
+      :ref="(el) => setFieldRef(field.attribute, el)"
       :is="`form-${field.component}`"
       :resource-name="resourceName"
       :resource-id="resourceId"
@@ -46,6 +46,7 @@ export default {
       isVisible: false,
       cachedContextPrefix: null,
       contextDetected: false,
+      fieldRefs: {},
     };
   },
 
@@ -79,6 +80,18 @@ export default {
   },
 
   methods: {
+    /**
+     * Store a reference to a child field component (Vue 3 function ref pattern).
+     * This is needed because Vue 3 doesn't support dynamic string refs in v-for.
+     */
+    setFieldRef(attribute, el) {
+      if (el) {
+        this.fieldRefs[attribute] = el;
+      } else {
+        delete this.fieldRefs[attribute];
+      }
+    },
+
     /**
      * Attempt to detect Flexible field context at mount time.
      * This is critical for proper event filtering in multi-group scenarios.
@@ -692,6 +705,7 @@ export default {
 
     fill(formData) {
       console.log('[NovaDependencyContainer] fill() called, isVisible:', this.isVisible);
+      console.log('[NovaDependencyContainer] Available fieldRefs:', Object.keys(this.fieldRefs));
 
       if (!this.isVisible) {
         console.log('[NovaDependencyContainer] Not visible, skipping fill');
@@ -700,21 +714,16 @@ export default {
 
       if (this.field.fields) {
         this.field.fields.forEach(field => {
-          const refKey = `field-${field.attribute}`;
-          let fieldComponent = this.$refs[refKey];
+          // Use Vue 3 function refs stored in fieldRefs object
+          const fieldComponent = this.fieldRefs[field.attribute];
 
-          // In Vue 3, refs in v-for are stored as arrays
-          if (Array.isArray(fieldComponent)) {
-            fieldComponent = fieldComponent[0];
-          }
-
-          console.log('[NovaDependencyContainer] Filling field:', field.attribute, 'component:', fieldComponent);
+          console.log('[NovaDependencyContainer] Filling field:', field.attribute, 'component:', fieldComponent ? 'found' : 'not found');
 
           if (fieldComponent && typeof fieldComponent.fill === 'function') {
             fieldComponent.fill(formData);
-            console.log('[NovaDependencyContainer] Field filled:', field.attribute);
+            console.log('[NovaDependencyContainer] Field filled successfully:', field.attribute);
           } else {
-            console.log('[NovaDependencyContainer] Could not fill field:', field.attribute, 'ref not found or no fill method');
+            console.warn('[NovaDependencyContainer] Could not fill field:', field.attribute, 'ref not found or no fill method');
           }
         });
       }
@@ -736,6 +745,9 @@ export default {
     if (this.mutationObserver) {
       this.mutationObserver.disconnect();
     }
+
+    // Clean up field refs
+    this.fieldRefs = {};
   },
 };
 </script>

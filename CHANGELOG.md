@@ -2,6 +2,24 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.14] - 2025-11-25
+
+### Fixed
+- Fixed dependent field values not being saved on form submission (Vue 3 ref pattern)
+- The previous fix in v1.0.13 used dynamic string refs which don't work reliably in Vue 3 v-for loops
+
+### Changed
+- Switched from dynamic string refs (`:ref="'field-' + field.attribute"`) to Vue 3 function refs (`:ref="(el) => setFieldRef(field.attribute, el)"`)
+- Added `fieldRefs` data property to store child field component references
+- Added `setFieldRef()` method to properly collect and manage child component refs
+- Updated `fill()` method to use the new `fieldRefs` object for accessing child components
+- Added cleanup for `fieldRefs` in `beforeUnmount` lifecycle hook
+
+### Technical
+- Vue 3 requires function refs when using dynamic ref names in v-for loops
+- Dynamic string refs like `:ref="'field-' + x"` create arrays but are unreliable to access via `$refs[key]`
+- Function refs `:ref="(el) => refs[key] = el"` provide direct access to component instances
+
 ## [1.0.13] - 2025-11-25
 
 ### Fixed
