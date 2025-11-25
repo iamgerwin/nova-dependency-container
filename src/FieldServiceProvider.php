@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Iamgerwin\NovaDependencyContainer;
 
 use Illuminate\Support\ServiceProvider;
-use Laravel\Nova\Events\ServingNova;
-use Laravel\Nova\Nova;
 
 class FieldServiceProvider extends ServiceProvider
 {
@@ -15,9 +13,14 @@ class FieldServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Nova::serving(function (ServingNova $event): void {
-            Nova::script('nova-dependency-container', __DIR__ . '/../dist/js/field.js');
-            Nova::style('nova-dependency-container', __DIR__ . '/../dist/css/field.css');
+        // Only register Nova assets when Nova is available
+        if (! class_exists(\Laravel\Nova\Nova::class)) {
+            return;
+        }
+
+        \Laravel\Nova\Nova::serving(function (mixed $event): void {
+            \Laravel\Nova\Nova::script('nova-dependency-container', __DIR__ . '/../dist/js/field.js');
+            \Laravel\Nova\Nova::style('nova-dependency-container', __DIR__ . '/../dist/css/field.css');
         });
     }
 
