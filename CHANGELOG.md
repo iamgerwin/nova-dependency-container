@@ -2,6 +2,22 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.4] - 2025-11-25
+
+### Fixed
+- Fixed Nova 4.35.x compatibility issue with `resolveForDisplay` method signature mismatch ([#1](https://github.com/iamgerwin/nova-dependency-container/issues/1))
+- Fixed `resolve` method signature to match parent `Laravel\Nova\Fields\Field` class
+- Updated `Stubs/Field.php` method signatures to align with Nova's actual implementation
+
+### Changed
+- Removed strict type hints from `resolve($resource, $attribute = null)` method for Nova compatibility
+- Removed strict type hints from `resolveForDisplay($resource, $attribute = null)` method for Nova compatibility
+- Updated `MockField` test mock to use compatible method signatures
+
+### Added
+- Added comprehensive tests for method signature compatibility using PHP Reflection API
+- Added tests for method invocation with various argument types
+
 ## [1.0.3] - 2025-09-26
 
 ### Added
