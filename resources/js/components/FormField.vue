@@ -252,15 +252,20 @@ export default {
     },
 
     /**
-     * Extract the prefix (e.g., "overlay_items__0__") from a full attribute.
+     * Extract the prefix from a full attribute.
+     * Supports multiple formats:
+     * - "overlay_items__0__field_name" -> "overlay_items__0__"
+     * - "overlay_items[0][field_name]" -> "overlay_items[0]["
+     * - "cSkn6uKpVHMkMLmI__field_name" -> "cSkn6uKpVHMkMLmI__" (random key format)
+     * - "cSkn6uKpVHMkMLmI__" -> "cSkn6uKpVHMkMLmI__" (prefix only)
      */
     extractPrefixFromAttribute(attribute) {
       if (!attribute) return null;
 
-      // Pattern 1: Double underscore format (e.g., "overlay_items__0__field_name")
-      const underscoreMatch = attribute.match(/^(.+__\d+__)/);
-      if (underscoreMatch) {
-        return underscoreMatch[1];
+      // Pattern 1: Double underscore with numeric index (e.g., "overlay_items__0__field_name")
+      const numericUnderscoreMatch = attribute.match(/^(.+__\d+__)/);
+      if (numericUnderscoreMatch) {
+        return numericUnderscoreMatch[1];
       }
 
       // Pattern 2: Bracket format (e.g., "overlay_items[0][field_name]")
@@ -269,27 +274,43 @@ export default {
         return bracketMatch[1];
       }
 
+      // Pattern 3: Random key format (e.g., "cSkn6uKpVHMkMLmI__field_name" or just "cSkn6uKpVHMkMLmI__")
+      // This handles nova-flexible-content's random key format
+      const randomKeyMatch = attribute.match(/^([a-zA-Z0-9]+__)/);
+      if (randomKeyMatch) {
+        return randomKeyMatch[1];
+      }
+
       return null;
     },
 
     /**
      * Extract the base attribute name from a potentially prefixed Flexible field attribute.
-     * e.g., "overlay_items__0__type" -> "type"
-     *       "overlay_items[0][type]" -> "type"
+     * Supports multiple formats:
+     * - "overlay_items__0__type" -> "type"
+     * - "overlay_items[0][type]" -> "type"
+     * - "cSkn6uKpVHMkMLmI__type" -> "type" (random key format)
      */
     extractBaseAttribute(attribute) {
       if (!attribute) return null;
 
-      // Pattern 1: Double underscore format (e.g., "overlay_items__0__field_name")
-      const underscoreMatch = attribute.match(/^.+__\d+__(.+)$/);
-      if (underscoreMatch) {
-        return underscoreMatch[1];
+      // Pattern 1: Double underscore with numeric index (e.g., "overlay_items__0__field_name")
+      const numericUnderscoreMatch = attribute.match(/^.+__\d+__(.+)$/);
+      if (numericUnderscoreMatch) {
+        return numericUnderscoreMatch[1];
       }
 
       // Pattern 2: Bracket format (e.g., "overlay_items[0][field_name]")
       const bracketMatch = attribute.match(/^.+\[\d+\]\[(.+)\]$/);
       if (bracketMatch) {
         return bracketMatch[1];
+      }
+
+      // Pattern 3: Random key format (e.g., "cSkn6uKpVHMkMLmI__type")
+      // This handles nova-flexible-content's random key format
+      const randomKeyMatch = attribute.match(/^[a-zA-Z0-9]+__(.+)$/);
+      if (randomKeyMatch) {
+        return randomKeyMatch[1];
       }
 
       return attribute;

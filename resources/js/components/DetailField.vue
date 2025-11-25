@@ -253,21 +253,31 @@ export default {
     },
 
     /**
-     * Extract the prefix (e.g., "overlay_items__0__") from a full attribute.
+     * Extract the prefix from a full attribute.
+     * Supports multiple formats:
+     * - "overlay_items__0__field_name" -> "overlay_items__0__"
+     * - "overlay_items[0][field_name]" -> "overlay_items[0]["
+     * - "cSkn6uKpVHMkMLmI__field_name" -> "cSkn6uKpVHMkMLmI__" (random key format)
      */
     extractPrefixFromAttribute(attribute) {
       if (!attribute) return null;
 
-      // Pattern 1: Double underscore format (e.g., "overlay_items__0__field_name")
-      const underscoreMatch = attribute.match(/^(.+__\d+__)/);
-      if (underscoreMatch) {
-        return underscoreMatch[1];
+      // Pattern 1: Double underscore with numeric index (e.g., "overlay_items__0__field_name")
+      const numericUnderscoreMatch = attribute.match(/^(.+__\d+__)/);
+      if (numericUnderscoreMatch) {
+        return numericUnderscoreMatch[1];
       }
 
       // Pattern 2: Bracket format (e.g., "overlay_items[0][field_name]")
       const bracketMatch = attribute.match(/^(.+\[\d+\]\[)/);
       if (bracketMatch) {
         return bracketMatch[1];
+      }
+
+      // Pattern 3: Random key format (e.g., "cSkn6uKpVHMkMLmI__field_name" or just "cSkn6uKpVHMkMLmI__")
+      const randomKeyMatch = attribute.match(/^([a-zA-Z0-9]+__)/);
+      if (randomKeyMatch) {
+        return randomKeyMatch[1];
       }
 
       return null;

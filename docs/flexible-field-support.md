@@ -168,6 +168,7 @@ This ensures that changing a field in Overlay Item #1 doesn't affect the depende
 
 ## Version History
 
+- **1.0.11**: Fixed regex patterns to support nova-flexible-content's random key format
 - **1.0.10**: Fixed FieldServiceProvider not registering assets with Nova
 - **1.0.9**: Added debug logging to diagnose Flexible field issues
 - **1.0.8**: Fixed missing compiled assets in package distribution
