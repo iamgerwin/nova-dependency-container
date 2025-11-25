@@ -75,6 +75,7 @@ export default {
     console.log('[NovaDependencyContainer] Mounted with field:', this.field);
     console.log('[NovaDependencyContainer] Dependencies:', this.field.dependencies);
     this.detectFlexibleContextOnMount();
+    this.applyFlexiblePrefixToChildFields();
     this.watchDependentFields();
     this.checkDependencies();
   },
@@ -90,6 +91,37 @@ export default {
       } else {
         delete this.fieldRefs[attribute];
       }
+    },
+
+    /**
+     * Apply the Flexible field prefix to child field attributes.
+     * This ensures child fields have the correct prefixed attribute when inside a Flexible layout,
+     * which is necessary for form data to be saved correctly.
+     */
+    applyFlexiblePrefixToChildFields() {
+      if (!this.cachedContextPrefix || !this.field.fields) {
+        return;
+      }
+
+      console.log('[NovaDependencyContainer] Applying Flexible prefix to child fields:', this.cachedContextPrefix);
+
+      this.field.fields.forEach(childField => {
+        if (!childField.attribute) return;
+
+        // Check if the attribute already has the prefix
+        if (childField.attribute.startsWith(this.cachedContextPrefix)) {
+          console.log('[NovaDependencyContainer] Child field already has prefix:', childField.attribute);
+          return;
+        }
+
+        // Store original attribute for reference
+        const originalAttribute = childField.attribute;
+
+        // Apply the Flexible prefix
+        childField.attribute = `${this.cachedContextPrefix}${childField.attribute}`;
+
+        console.log('[NovaDependencyContainer] Prefixed child field attribute:', originalAttribute, '->', childField.attribute);
+      });
     },
 
     /**

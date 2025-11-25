@@ -2,6 +2,22 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.15] - 2025-11-25
+
+### Fixed
+- Fixed child field values not being saved when NovaDependencyContainer is used inside nova-flexible-content layouts
+- Child fields now correctly receive the Flexible prefix (e.g., `cDsaj6Ub0m9hChBj__recipient_email`) for proper form data submission
+- Related to nova-flexible-content issue: https://github.com/whitecube/nova-flexible-content/issues/524
+
+### Added
+- Added `applyFlexiblePrefixToChildFields()` method to automatically prefix child field attributes when inside a Flexible context
+- Child field attributes are now prefixed at mount time if a Flexible context is detected
+
+### Technical
+- nova-flexible-content generates cryptic prefixes (e.g., `cDsaj6Ub0m9hChBj__`) for field attributes
+- NovaDependencyContainer's child fields were using unprefixed attributes, causing form data to be ignored by Flexible
+- The fix applies the detected Flexible prefix to all child field attributes before they render
+
 ## [1.0.14] - 2025-11-25
 
 ### Fixed
