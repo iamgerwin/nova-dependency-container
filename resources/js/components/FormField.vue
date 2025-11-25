@@ -43,6 +43,7 @@ export default {
     return {
       dependentFieldValues: {},
       isVisible: false,
+      cachedContextPrefix: null,
     };
   },
 
@@ -84,15 +85,53 @@ export default {
 
     handleFieldChanged(event) {
       const fullAttribute = event.field.attribute;
+      const eventPrefix = this.extractPrefixFromAttribute(fullAttribute);
+      const currentPrefix = this.getFlexibleContextPrefix();
+
+      // For Flexible fields: only process events from the same group context
+      // If both have prefixes, they must match; if neither has prefix, process normally
+      if (eventPrefix && currentPrefix) {
+        if (eventPrefix !== currentPrefix) {
+          // Event is from a different Flexible group, ignore it
+          return;
+        }
+      }
+
       this.dependentFieldValues[fullAttribute] = event.value;
 
       // Also store by base attribute name (without Flexible prefix) for easier lookup
       const baseAttribute = this.extractBaseAttribute(fullAttribute);
       if (baseAttribute && baseAttribute !== fullAttribute) {
         this.dependentFieldValues[baseAttribute] = event.value;
+
+        // Cache the context prefix from incoming events for better Flexible field detection
+        if (!this.cachedContextPrefix && eventPrefix) {
+          this.cachedContextPrefix = eventPrefix;
+        }
       }
 
       this.checkDependencies();
+    },
+
+    /**
+     * Extract the prefix (e.g., "overlay_items__0__") from a full attribute.
+     */
+    extractPrefixFromAttribute(attribute) {
+      if (!attribute) return null;
+
+      // Pattern 1: Double underscore format (e.g., "overlay_items__0__field_name")
+      const underscoreMatch = attribute.match(/^(.+__\d+__)/);
+      if (underscoreMatch) {
+        return underscoreMatch[1];
+      }
+
+      // Pattern 2: Bracket format (e.g., "overlay_items[0][field_name]")
+      const bracketMatch = attribute.match(/^(.+\[\d+\]\[)/);
+      if (bracketMatch) {
+        return bracketMatch[1];
+      }
+
+      return null;
     },
 
     /**
@@ -292,33 +331,46 @@ export default {
      * Flexible fields use prefixes like: flexible_key__index__ or flexible_key[index]
      */
     getFlexibleContextPrefix() {
+      // Return cached prefix if available (detected from field-changed events)
+      if (this.cachedContextPrefix) {
+        return this.cachedContextPrefix;
+      }
+
       // Check if this container has a prefixed attribute (indicating it's inside a Flexible field)
       const ownAttribute = this.field?.attribute || '';
 
       // Pattern 1: Double underscore format (e.g., "overlay_items__0__field_name")
       const underscoreMatch = ownAttribute.match(/^(.+__\d+__)/);
       if (underscoreMatch) {
-        return underscoreMatch[1];
+        this.cachedContextPrefix = underscoreMatch[1];
+        return this.cachedContextPrefix;
       }
 
       // Pattern 2: Bracket format (e.g., "overlay_items[0][field_name]")
       const bracketMatch = ownAttribute.match(/^(.+\[\d+\]\[)/);
       if (bracketMatch) {
-        return bracketMatch[1];
+        this.cachedContextPrefix = bracketMatch[1];
+        return this.cachedContextPrefix;
       }
 
-      // Try to detect from parent/sibling field attributes
-      const siblingFields = this.field?.fields || [];
-      for (const sibling of siblingFields) {
-        if (sibling.attribute) {
-          const siblingUnderscoreMatch = sibling.attribute.match(/^(.+__\d+__)/);
-          if (siblingUnderscoreMatch) {
-            return siblingUnderscoreMatch[1];
+      // Try to detect from child field attributes (inside the container)
+      const childFields = this.field?.fields || [];
+      for (const child of childFields) {
+        if (child.attribute) {
+          const childPrefix = this.extractPrefixFromAttribute(child.attribute);
+          if (childPrefix) {
+            this.cachedContextPrefix = childPrefix;
+            return this.cachedContextPrefix;
           }
-          const siblingBracketMatch = sibling.attribute.match(/^(.+\[\d+\]\[)/);
-          if (siblingBracketMatch) {
-            return siblingBracketMatch[1];
-          }
+        }
+      }
+
+      // Try to detect from cached dependent field values
+      for (const attr of Object.keys(this.dependentFieldValues)) {
+        const prefix = this.extractPrefixFromAttribute(attr);
+        if (prefix) {
+          this.cachedContextPrefix = prefix;
+          return this.cachedContextPrefix;
         }
       }
 
