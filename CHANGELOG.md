@@ -2,6 +2,24 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.12] - 2025-11-25
+
+### Fixed
+- Fixed field change detection inside Flexible layouts where Nova events are not emitted
+- Added DOM-based watching as fallback when Nova's global field-changed events don't fire
+
+### Added
+- Added `setupDOMWatching()` to listen for native DOM change/input events
+- Added `loadInitialValuesFromDOM()` to get field values directly from DOM elements
+- Added `findFlexibleContainer()` to locate the Flexible layout wrapper
+- Added `handleDOMChange()` to process native DOM events
+- Added `MutationObserver` to detect dynamically added elements
+
+### Technical
+- Fields inside nova-flexible-content don't emit to Nova's global event bus
+- Now watches select/input/textarea elements directly via addEventListener
+- Properly cleans up event listeners and MutationObserver on unmount
+
 ## [1.0.11] - 2025-11-25
 
 ### Fixed
