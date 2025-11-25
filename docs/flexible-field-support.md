@@ -168,6 +168,7 @@ This ensures that changing a field in Overlay Item #1 doesn't affect the depende
 
 ## Version History
 
+- **1.0.13**: Fixed dependent field values not being saved on form submission
 - **1.0.12**: Added DOM-based watching for Flexible fields where Nova events don't fire
 - **1.0.11**: Fixed regex patterns to support nova-flexible-content's random key format
 - **1.0.10**: Fixed FieldServiceProvider not registering assets with Nova

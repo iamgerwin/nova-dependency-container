@@ -2,7 +2,8 @@
   <div v-show="isVisible" :class="containerClasses">
     <component
       v-for="(field, index) in field.fields"
-      :key="index"
+      :key="field.attribute || index"
+      :ref="'field-' + field.attribute"
       :is="`form-${field.component}`"
       :resource-name="resourceName"
       :resource-id="resourceId"
@@ -690,15 +691,30 @@ export default {
     },
 
     fill(formData) {
+      console.log('[NovaDependencyContainer] fill() called, isVisible:', this.isVisible);
+
       if (!this.isVisible) {
+        console.log('[NovaDependencyContainer] Not visible, skipping fill');
         return;
       }
 
       if (this.field.fields) {
         this.field.fields.forEach(field => {
-          const fieldComponent = this.$refs[`field-${field.attribute}`];
+          const refKey = `field-${field.attribute}`;
+          let fieldComponent = this.$refs[refKey];
+
+          // In Vue 3, refs in v-for are stored as arrays
+          if (Array.isArray(fieldComponent)) {
+            fieldComponent = fieldComponent[0];
+          }
+
+          console.log('[NovaDependencyContainer] Filling field:', field.attribute, 'component:', fieldComponent);
+
           if (fieldComponent && typeof fieldComponent.fill === 'function') {
             fieldComponent.fill(formData);
+            console.log('[NovaDependencyContainer] Field filled:', field.attribute);
+          } else {
+            console.log('[NovaDependencyContainer] Could not fill field:', field.attribute, 'ref not found or no fill method');
           }
         });
       }
