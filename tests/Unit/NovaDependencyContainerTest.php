@@ -169,3 +169,85 @@ it('does not show on detail by default', function () {
 
     expect($container->showOnDetail)->toBeFalse();
 });
+
+it('has resolve method signature compatible with Nova Field class', function () {
+    $reflection = new ReflectionMethod(NovaDependencyContainer::class, 'resolve');
+
+    // Method should have no return type (matches Nova Field parent class)
+    expect($reflection->hasReturnType())->toBeFalse();
+
+    // Method should have two parameters
+    $parameters = $reflection->getParameters();
+    expect($parameters)->toHaveCount(2);
+
+    // First parameter: $resource (no type hint)
+    expect($parameters[0]->getName())->toBe('resource');
+    expect($parameters[0]->hasType())->toBeFalse();
+
+    // Second parameter: $attribute (no type hint, has default null)
+    expect($parameters[1]->getName())->toBe('attribute');
+    expect($parameters[1]->hasType())->toBeFalse();
+    expect($parameters[1]->isDefaultValueAvailable())->toBeTrue();
+    expect($parameters[1]->getDefaultValue())->toBeNull();
+});
+
+it('has resolveForDisplay method signature compatible with Nova Field class', function () {
+    $reflection = new ReflectionMethod(NovaDependencyContainer::class, 'resolveForDisplay');
+
+    // Method should have no return type (matches Nova Field parent class)
+    expect($reflection->hasReturnType())->toBeFalse();
+
+    // Method should have two parameters
+    $parameters = $reflection->getParameters();
+    expect($parameters)->toHaveCount(2);
+
+    // First parameter: $resource (no type hint)
+    expect($parameters[0]->getName())->toBe('resource');
+    expect($parameters[0]->hasType())->toBeFalse();
+
+    // Second parameter: $attribute (no type hint, has default null)
+    expect($parameters[1]->getName())->toBe('attribute');
+    expect($parameters[1]->hasType())->toBeFalse();
+    expect($parameters[1]->isDefaultValueAvailable())->toBeTrue();
+    expect($parameters[1]->getDefaultValue())->toBeNull();
+});
+
+it('can call resolve method with various argument types', function () {
+    $container = NovaDependencyContainer::make([
+        Text::make('Field 1'),
+    ]);
+
+    $resource = new stdClass;
+    $resource->field_1 = 'test value';
+
+    // Should work with null attribute (default)
+    $container->resolve($resource);
+
+    // Should work with string attribute
+    $container->resolve($resource, 'field_1');
+
+    // Should work with null explicitly passed
+    $container->resolve($resource, null);
+
+    expect(true)->toBeTrue();
+});
+
+it('can call resolveForDisplay method with various argument types', function () {
+    $container = NovaDependencyContainer::make([
+        Text::make('Field 1'),
+    ]);
+
+    $resource = new stdClass;
+    $resource->field_1 = 'test value';
+
+    // Should work with null attribute (default)
+    $container->resolveForDisplay($resource);
+
+    // Should work with string attribute
+    $container->resolveForDisplay($resource, 'field_1');
+
+    // Should work with null explicitly passed
+    $container->resolveForDisplay($resource, null);
+
+    expect(true)->toBeTrue();
+});
