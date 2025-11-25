@@ -2,6 +2,22 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.13] - 2025-11-25
+
+### Fixed
+- Fixed dependent field values not being saved on form submission
+- Added missing `ref` attribute to child components in template for proper Vue component referencing
+- Fixed `fill()` method to handle Vue 3's array-based refs in v-for loops
+
+### Changed
+- Updated template to use `:ref="'field-' + field.attribute"` for each child field
+- Updated `fill()` method to extract first element when ref is an array (Vue 3 behavior)
+- Improved `:key` binding to use `field.attribute` for better component tracking
+
+### Technical
+- In Vue 3, refs created in v-for loops are stored as arrays, not single elements
+- The fill method now correctly accesses `$refs[refKey][0]` when the ref is an array
+
 ## [1.0.12] - 2025-11-25
 
 ### Fixed
