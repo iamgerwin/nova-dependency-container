@@ -2,6 +2,20 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.8] - 2025-11-25
+
+### Fixed
+- Fixed missing compiled assets in package distribution
+- The `/dist` folder was incorrectly gitignored, preventing built Vue components from being included
+
+### Changed
+- Removed `/dist` from .gitignore to include compiled assets in package
+- Added `PR.md` to .gitignore
+
+### Technical
+- Built production assets with `npm run prod`
+- Compiled `dist/js/field.js` (21.5 KiB) and `dist/css/field.css`
+
 ## [1.0.7] - 2025-11-25
 
 ### Fixed
