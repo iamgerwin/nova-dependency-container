@@ -205,6 +205,171 @@ export default {
 
       console.log('[NovaDependencyContainer] Watching for field-changed events');
       Nova.$on('field-changed', this.handleFieldChanged);
+
+      // Also set up DOM-based watching for Flexible fields where Nova events might not work
+      this.$nextTick(() => {
+        this.setupDOMWatching();
+        // Try to get initial values from DOM
+        this.loadInitialValuesFromDOM();
+      });
+    },
+
+    /**
+     * Set up DOM-based watching for field changes.
+     * This is needed because fields inside Flexible layouts may not emit Nova events.
+     */
+    setupDOMWatching() {
+      if (!this.cachedContextPrefix) return;
+
+      // Find the Flexible layout container
+      const flexibleContainer = this.findFlexibleContainer();
+      if (!flexibleContainer) {
+        console.log('[NovaDependencyContainer] Could not find Flexible container for DOM watching');
+        return;
+      }
+
+      console.log('[NovaDependencyContainer] Setting up DOM watching on Flexible container');
+
+      // Watch for changes on select, input, and textarea elements
+      const watchElements = flexibleContainer.querySelectorAll('select, input, textarea');
+      watchElements.forEach(el => {
+        el.addEventListener('change', this.handleDOMChange);
+        el.addEventListener('input', this.handleDOMChange);
+      });
+
+      // Store reference for cleanup
+      this.watchedElements = watchElements;
+      this.flexibleContainer = flexibleContainer;
+
+      // Also use MutationObserver to catch dynamically added elements
+      this.setupMutationObserver(flexibleContainer);
+    },
+
+    /**
+     * Set up MutationObserver to watch for DOM changes in the Flexible container.
+     */
+    setupMutationObserver(container) {
+      if (this.mutationObserver) {
+        this.mutationObserver.disconnect();
+      }
+
+      this.mutationObserver = new MutationObserver((mutations) => {
+        // When DOM changes, re-check dependencies
+        this.loadInitialValuesFromDOM();
+      });
+
+      this.mutationObserver.observe(container, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['value']
+      });
+    },
+
+    /**
+     * Find the Flexible layout container element.
+     */
+    findFlexibleContainer() {
+      let el = this.$el;
+      let depth = 0;
+      const maxDepth = 20;
+
+      while (el && depth < maxDepth) {
+        // Look for Flexible layout markers
+        if (el.classList && (
+          el.classList.contains('flexible-group') ||
+          el.classList.contains('nova-flexible-content-group') ||
+          el.dataset?.flexibleGroup
+        )) {
+          return el;
+        }
+
+        // Look for parent with the same prefix in data attributes
+        if (el.querySelector && this.cachedContextPrefix) {
+          const prefixedElements = el.querySelectorAll(`[name^="${this.cachedContextPrefix}"], [id^="${this.cachedContextPrefix}"]`);
+          if (prefixedElements.length > 1) {
+            return el;
+          }
+        }
+
+        el = el.parentElement;
+        depth++;
+      }
+
+      // Fallback: return the closest form or field container
+      return this.$el?.closest('form') || this.$el?.closest('[data-field-wrapper]') || document.body;
+    },
+
+    /**
+     * Handle DOM change events from sibling fields.
+     */
+    handleDOMChange(event) {
+      const element = event.target;
+      const name = element.name || element.id || '';
+      const value = element.type === 'checkbox' ? element.checked : element.value;
+
+      console.log('[NovaDependencyContainer] DOM change detected:', { name, value });
+
+      if (!name) return;
+
+      // Check if this element belongs to our Flexible context
+      const elementPrefix = this.extractPrefixFromAttribute(name);
+      if (this.cachedContextPrefix && elementPrefix && elementPrefix !== this.cachedContextPrefix) {
+        return; // Different Flexible group
+      }
+
+      const baseAttribute = this.extractBaseAttribute(name);
+      const isRelevantField = this.field.dependencies.some(dep => dep.field === baseAttribute);
+
+      if (isRelevantField) {
+        console.log('[NovaDependencyContainer] Relevant field changed via DOM:', baseAttribute, '=', value);
+        this.dependentFieldValues[name] = value;
+        this.dependentFieldValues[baseAttribute] = value;
+        this.checkDependencies();
+      }
+    },
+
+    /**
+     * Load initial values from DOM elements.
+     */
+    loadInitialValuesFromDOM() {
+      if (!this.field.dependencies) return;
+
+      console.log('[NovaDependencyContainer] Loading initial values from DOM');
+
+      for (const dependency of this.field.dependencies) {
+        const fieldName = dependency.field;
+        const prefixedName = this.cachedContextPrefix ? `${this.cachedContextPrefix}${fieldName}` : fieldName;
+
+        // Try to find the element by various selectors
+        const selectors = [
+          `[name="${prefixedName}"]`,
+          `[name="${fieldName}"]`,
+          `[id="${prefixedName}"]`,
+          `[id="${fieldName}"]`,
+          `[name$="__${fieldName}"]`,
+          `[name$="[${fieldName}]"]`,
+        ];
+
+        for (const selector of selectors) {
+          try {
+            const element = document.querySelector(selector);
+            if (element) {
+              const value = element.type === 'checkbox' ? element.checked : element.value;
+              console.log('[NovaDependencyContainer] Found initial value from DOM:', selector, '=', value);
+
+              if (value !== undefined && value !== null && value !== '') {
+                this.dependentFieldValues[element.name || element.id] = value;
+                this.dependentFieldValues[fieldName] = value;
+                this.checkDependencies();
+                break;
+              }
+            }
+          } catch (e) {
+            // Invalid selector, skip
+          }
+        }
+      }
     },
 
     handleFieldChanged(event) {
@@ -542,6 +707,19 @@ export default {
 
   beforeUnmount() {
     Nova.$off('field-changed', this.handleFieldChanged);
+
+    // Clean up DOM watchers
+    if (this.watchedElements) {
+      this.watchedElements.forEach(el => {
+        el.removeEventListener('change', this.handleDOMChange);
+        el.removeEventListener('input', this.handleDOMChange);
+      });
+    }
+
+    // Disconnect MutationObserver
+    if (this.mutationObserver) {
+      this.mutationObserver.disconnect();
+    }
   },
 };
 </script>
