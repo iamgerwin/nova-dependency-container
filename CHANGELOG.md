@@ -2,6 +2,27 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.6] - 2025-11-25
+
+### Fixed
+- Fixed Flexible field context detection when container attribute is empty ([#4](https://github.com/iamgerwin/nova-dependency-container/issues/4))
+- Fixed cross-group event contamination in Flexible layouts
+
+### Added
+- Added `cachedContextPrefix` for improved performance and reliability
+- Added `extractPrefixFromAttribute()` method for better prefix extraction
+- Added cross-group event filtering to prevent dependency interference between Flexible groups
+
+### Changed
+- Enhanced `getFlexibleContextPrefix()` to check child field attributes when container attribute is empty
+- Enhanced `handleFieldChanged()` to filter events by Flexible group context
+- Updated documentation with improved context detection details
+
+### Technical
+- Implemented context prefix caching from field-changed events
+- Implemented cross-group event filtering in FormField.vue
+- Updated both `FormField.vue` and `DetailField.vue` components
+
 ## [1.0.5] - 2025-11-25
 
 ### Added

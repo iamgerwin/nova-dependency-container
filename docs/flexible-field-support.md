@@ -130,11 +130,25 @@ If a field remains hidden when it should be visible:
 
 ### Context Detection
 
-The Flexible context is detected by examining:
+The Flexible context is detected by examining (in order of priority):
 
-1. The container's own `attribute` property
-2. Sibling field `attribute` properties
-3. Parent component structure
+1. Cached context prefix from previous field-changed events
+2. The container's own `attribute` property
+3. Child field `attribute` properties (inside the dependency container)
+4. Cached dependent field values
+5. Parent component structure
+
+The context prefix is cached once detected, improving performance and reliability for subsequent dependency checks.
+
+### Cross-Group Event Filtering
+
+When a field changes inside a Flexible layout, the event is broadcast globally. The dependency container automatically filters events to only process those from the same Flexible group:
+
+- Events with a prefix matching the container's context are processed
+- Events from different Flexible groups (different index) are ignored
+- Non-prefixed events are processed normally (for non-Flexible contexts)
+
+This ensures that changing a field in Overlay Item #1 doesn't affect the dependent fields in Overlay Item #2.
 
 ### Regex Patterns Used
 
@@ -154,6 +168,7 @@ The Flexible context is detected by examining:
 
 ## Version History
 
+- **1.0.6**: Improved Flexible field context detection and cross-group event filtering
 - **1.0.5**: Added Flexible field support (this feature)
 - **1.0.4**: Nova 4.35.x compatibility fixes
 - **1.0.0**: Initial release
