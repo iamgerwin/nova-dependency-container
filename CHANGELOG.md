@@ -2,6 +2,22 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.16] - 2025-11-25
+
+### Changed
+- Removed all console.log debug statements from Vue components for production readiness
+- Improved FieldServiceProvider to gracefully handle environments where Nova is not available
+- Updated PHP version requirement to support PHP 8.3, 8.4, and 8.5
+- Updated dependency versions for better compatibility (collision ^8.6, pest ^3.7.4)
+
+### Fixed
+- Fixed PHPStan analysis errors by adding Nova availability check in FieldServiceProvider
+- Fixed test failures when Nova package is not installed in dev environment
+
+### Technical
+- Reduced JavaScript bundle size by removing debug logging (~2.5KB reduction)
+- Added class_exists check before registering Nova assets to prevent errors in non-Nova environments
+
 ## [1.0.15] - 2025-11-25
 
 ### Fixed
