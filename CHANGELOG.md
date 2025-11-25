@@ -2,6 +2,16 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.9] - 2025-11-25
+
+### Added
+- Added comprehensive debug logging to diagnose Flexible field issues
+- Added console logs for: mount, context detection, event handling, dependency checking
+
+### Technical
+- Debug logging helps identify where the dependency container is failing in Flexible layouts
+- Logs are prefixed with `[NovaDependencyContainer]` for easy filtering in browser console
+
 ## [1.0.8] - 2025-11-25
 
 ### Fixed
