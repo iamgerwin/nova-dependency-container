@@ -2,6 +2,20 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.11] - 2025-11-25
+
+### Fixed
+- Fixed regex patterns to support nova-flexible-content's random key attribute format
+- The package was only matching numeric index patterns like `overlay_items__0__` but not random keys like `cSkn6uKpVHMkMLmI__`
+
+### Changed
+- Updated `extractPrefixFromAttribute()` to support random key format: `^([a-zA-Z0-9]+__)`
+- Updated `extractBaseAttribute()` to extract field names from random key prefixed attributes
+
+### Technical
+- nova-flexible-content uses random alphanumeric keys instead of numeric indices
+- Example: `cSkn6uKpVHMkMLmI__type` instead of `overlay_items__0__type`
+
 ## [1.0.10] - 2025-11-25
 
 ### Fixed
