@@ -2,6 +2,19 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.10] - 2025-11-25
+
+### Fixed
+- Fixed FieldServiceProvider not correctly registering JavaScript assets with Nova
+- The previous `$app->resolving()` pattern was not working; switched to standard `Nova::serving()` pattern
+
+### Changed
+- Refactored FieldServiceProvider to use the standard Nova asset registration pattern
+- Now properly imports `Laravel\Nova\Events\ServingNova` and `Laravel\Nova\Nova`
+
+### Technical
+- This was the root cause of the Flexible field issue - the Vue components were never being loaded
+
 ## [1.0.9] - 2025-11-25
 
 ### Added
