@@ -70,6 +70,8 @@ export default {
   },
 
   mounted() {
+    console.log('[NovaDependencyContainer] Mounted with field:', this.field);
+    console.log('[NovaDependencyContainer] Dependencies:', this.field.dependencies);
     this.detectFlexibleContextOnMount();
     this.watchDependentFields();
     this.checkDependencies();
@@ -81,11 +83,15 @@ export default {
      * This is critical for proper event filtering in multi-group scenarios.
      */
     detectFlexibleContextOnMount() {
+      console.log('[NovaDependencyContainer] detectFlexibleContextOnMount called');
+
       // Method 1: Check container's own attribute
       const ownAttribute = this.field?.attribute || '';
+      console.log('[NovaDependencyContainer] Container attribute:', ownAttribute);
       if (ownAttribute) {
         const prefix = this.extractPrefixFromAttribute(ownAttribute);
         if (prefix) {
+          console.log('[NovaDependencyContainer] Detected context from own attribute:', prefix);
           this.cachedContextPrefix = prefix;
           this.contextDetected = true;
           return;
@@ -192,20 +198,33 @@ export default {
 
     watchDependentFields() {
       if (!this.field.dependencies || this.field.dependencies.length === 0) {
+        console.log('[NovaDependencyContainer] No dependencies, showing field');
         this.isVisible = true;
         return;
       }
 
+      console.log('[NovaDependencyContainer] Watching for field-changed events');
       Nova.$on('field-changed', this.handleFieldChanged);
     },
 
     handleFieldChanged(event) {
+      console.log('[NovaDependencyContainer] field-changed event received:', event);
       const fullAttribute = event.field.attribute;
       const eventPrefix = this.extractPrefixFromAttribute(fullAttribute);
       const baseAttribute = this.extractBaseAttribute(fullAttribute);
 
+      console.log('[NovaDependencyContainer] Event details:', {
+        fullAttribute,
+        eventPrefix,
+        baseAttribute,
+        value: event.value,
+        cachedContextPrefix: this.cachedContextPrefix,
+        contextDetected: this.contextDetected
+      });
+
       // Check if this event is for a field we depend on
       const isRelevantField = this.field.dependencies.some(dep => dep.field === baseAttribute);
+      console.log('[NovaDependencyContainer] Is relevant field:', isRelevantField, 'Dependencies:', this.field.dependencies.map(d => d.field));
 
       // If we have a detected context, filter events strictly
       if (this.contextDetected && this.cachedContextPrefix) {
@@ -277,6 +296,9 @@ export default {
     },
 
     checkDependencies() {
+      console.log('[NovaDependencyContainer] checkDependencies called');
+      console.log('[NovaDependencyContainer] Cached values:', this.dependentFieldValues);
+
       if (!this.field.dependencies || this.field.dependencies.length === 0) {
         this.isVisible = true;
         return;
@@ -286,6 +308,7 @@ export default {
 
       for (const dependency of this.field.dependencies) {
         const fieldValue = this.getFieldValue(dependency.field);
+        console.log('[NovaDependencyContainer] Checking dependency:', dependency.field, '=', dependency.value, ', current value:', fieldValue);
 
         if (dependency.hasOwnProperty('value')) {
           if (Array.isArray(dependency.value)) {
@@ -331,6 +354,7 @@ export default {
       }
 
       this.isVisible = satisfied;
+      console.log('[NovaDependencyContainer] Setting isVisible to:', satisfied);
 
       if (this.field.applyToFields && this.field.fields) {
         this.field.fields.forEach(field => {
