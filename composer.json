@@ -1,6 +1,6 @@
 {
     "name": "iamgerwin/nova-dependency-container",
-    "version": "1.0.11",
+    "version": "1.0.12",
     "description": "A Laravel Nova 4 and 5 field container allowing to depend on other fields values",
     "keywords": [
         "laravel",
