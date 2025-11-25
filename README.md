@@ -14,6 +14,7 @@ A Laravel Nova field container allowing fields to depend on other field values. 
 - **Conditional Field Display**: Show/hide fields based on other field values
 - **Multiple Dependency Types**: Support for various comparison operators
 - **Complex Logic**: Chain multiple conditions together
+- **Flexible Field Support**: Works with [whitecube/nova-flexible-content](https://github.com/whitecube/nova-flexible-content) layouts
 - **Nova 4 & 5 Compatible**: Works with Laravel Nova 4.x and 5.x (tested with Nova 4.35.x and Nova 5.7.5)
 - **Laravel 12 Ready**: Full support for Laravel 11.x and 12.x
 - **PHP 8.3 Support**: Modern PHP features and type safety
@@ -186,6 +187,41 @@ class CustomTextField extends Text
 CustomTextField::make('Special Field')
     ->dependsOn('type', 'custom')
 ```
+
+### Using with Flexible Fields
+
+`NovaDependencyContainer` works seamlessly with [whitecube/nova-flexible-content](https://github.com/whitecube/nova-flexible-content) Flexible fields:
+
+```php
+use Iamgerwin\NovaDependencyContainer\NovaDependencyContainer;
+use Whitecube\NovaFlexibleContent\Flexible;
+use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Text;
+
+Flexible::make('Overlay Items')
+    ->addLayout('Overlay Item', 'overlay_item', [
+        Select::make('Type')
+            ->options([
+                'Default' => 'Default',
+                'Location' => 'Location',
+                'Contact Us' => 'Contact Us',
+            ]),
+
+        NovaDependencyContainer::make([
+            Text::make('Recipient Email', 'recipient_email')
+                ->rules('nullable', 'email', 'max:255'),
+        ])->dependsOn('type', 'Contact Us'),
+
+        NovaDependencyContainer::make([
+            Text::make('Location Name', 'location_name'),
+            Text::make('Address', 'address'),
+        ])->dependsOn('type', 'Location'),
+    ]),
+```
+
+The package automatically detects the Flexible field context and resolves field attributes correctly, even with dynamically prefixed attribute names.
+
+For more details, see the [Flexible Field Support documentation](docs/flexible-field-support.md).
 
 ## Advanced Examples
 
