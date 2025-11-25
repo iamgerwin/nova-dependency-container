@@ -2,6 +2,26 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.5] - 2025-11-25
+
+### Added
+- Added support for [whitecube/nova-flexible-content](https://github.com/whitecube/nova-flexible-content) Flexible field layouts ([#2](https://github.com/iamgerwin/nova-dependency-container/issues/2))
+- Added context-aware dependency resolution for nested field structures
+- Added automatic detection of Flexible field attribute prefixes
+- Added support for multiple Flexible attribute formats (double underscore and bracket notation)
+- Added comprehensive documentation for Flexible field support (`docs/flexible-field-support.md`)
+
+### Changed
+- Enhanced `findFieldByAttribute()` method to support prefix-based field lookups
+- Enhanced `getFieldValue()` method to check multiple attribute formats
+- Enhanced `handleFieldChanged()` to cache both full and base attribute values
+
+### Technical
+- Implemented `getFlexibleContextPrefix()` for detecting Flexible field context
+- Implemented `extractBaseAttribute()` for parsing prefixed attribute names
+- Implemented `getFlexibleAttributeFormats()` for generating alternative attribute patterns
+- Updated both `FormField.vue` and `DetailField.vue` components
+
 ## [1.0.4] - 2025-11-25
 
 ### Fixed
