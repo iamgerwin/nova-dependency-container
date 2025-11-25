@@ -2,6 +2,29 @@
 
 All notable changes to `nova-dependency-container` will be documented in this file.
 
+## [1.0.7] - 2025-11-25
+
+### Fixed
+- Fixed cross-group contamination in multi-group Flexible layouts ([#4](https://github.com/iamgerwin/nova-dependency-container/issues/4))
+- Fixed context detection failing when container and child field attributes are empty
+
+### Added
+- Added `detectFlexibleContextOnMount()` for early context detection at component mount
+- Added `contextDetected` flag for better context state management
+- Added DOM-based context detection as fallback method
+- Added Vue component tree traversal for Flexible layout parent detection
+
+### Changed
+- Enhanced context detection to use multiple methods: container attribute, child fields, parent components, and DOM
+- Improved event handling to only cache base attribute when context matches
+- Events from other Flexible groups are now strictly filtered once context is detected
+- Context is now claimed only from events matching dependency fields
+
+### Technical
+- Implemented 4-method context detection approach in FormField.vue
+- Implemented same detection approach in DetailField.vue for consistency
+- Each container now maintains its own isolated context
+
 ## [1.0.6] - 2025-11-25
 
 ### Fixed

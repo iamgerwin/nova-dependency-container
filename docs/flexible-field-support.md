@@ -168,6 +168,7 @@ This ensures that changing a field in Overlay Item #1 doesn't affect the depende
 
 ## Version History
 
+- **1.0.7**: Fixed multi-group context contamination with 4-method detection approach
 - **1.0.6**: Improved Flexible field context detection and cross-group event filtering
 - **1.0.5**: Added Flexible field support (this feature)
 - **1.0.4**: Nova 4.35.x compatibility fixes
